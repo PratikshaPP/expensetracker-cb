@@ -3,8 +3,6 @@
  */
 package com.expensetrakcer.cb;
 
-import java.util.Date;
-
 import org.vaadin.viritin.form.AbstractForm;
 import org.vaadin.viritin.layouts.MFormLayout;
 
@@ -38,6 +36,8 @@ public class ExpenseEditor extends AbstractForm<ExpenseDetail> {
     TextField transactionAmount = new TextField("Transaction Amount");
     
     TextArea description = new TextArea("Description");
+    
+    
 
 	@Override
 	protected Component createContent() {

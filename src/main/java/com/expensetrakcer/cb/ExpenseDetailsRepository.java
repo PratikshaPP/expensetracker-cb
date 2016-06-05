@@ -23,5 +23,6 @@ public interface ExpenseDetailsRepository extends CouchbasePagingAndSortingRepos
 	List<ExpenseDetail> findByTransactionDate(Date transactionDate);
 	
 	List<ExpenseDetail> findByMerchant(String merchantName);
-
+	
+	List<ExpenseDetail> findByMerchantStartsWithIgnoreCase(String merchantName);
 }

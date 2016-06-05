@@ -45,6 +45,8 @@ public class ExpenseTrackerBoot {
 			    for (ExpenseDetail ed : repository.findAll()) {  
 			    	log.info("********       Expense Details :=         "+ed);  
 		        }
+			    
+			    //log.info(" findByMerchant := "+repository.findByMerchant("Patel"));
 			}
 		};
     }	
