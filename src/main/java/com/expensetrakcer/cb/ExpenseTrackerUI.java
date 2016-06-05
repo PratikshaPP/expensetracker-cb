@@ -68,7 +68,7 @@ public class ExpenseTrackerUI extends UI {
 		this.repo = repo;
 		this.editor = editor;
 		this.grid = new MTable<>(ExpenseDetail.class).withProperties("transactionDate", "transactionAmount", "transactionType", "merchant", "description").withHeight("300px");
-		this.addNewBtn = new Button("New expense", FontAwesome.PLUS_CIRCLE);
+		this.addNewBtn = new Button("New Expense", FontAwesome.PLUS_CIRCLE);
 		this.filter = new TextField();
 		
 		//fieldToSearch = new NativeSelect ("Search By");
@@ -149,7 +149,7 @@ public class ExpenseTrackerUI extends UI {
 			@Override
 			public void buttonClick(ClickEvent e) {
 				
-				listExpensesByCriteria (null, null);
+				listExpensesByDateRange (fromDate.getValue(), toDate.getValue());
 			}
 
 		});		
@@ -158,6 +158,8 @@ public class ExpenseTrackerUI extends UI {
 		showAllBtn.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent e) {
+				fromDate.clear();
+				toDate.clear();
 				listExpenses(null);
 			}
 		});
@@ -212,7 +214,13 @@ public class ExpenseTrackerUI extends UI {
 		} else {
 			log.info("*********  Query By Search Field       ************ "+ searchField);
 		}
-		
-		
 	}
+	
+	private void listExpensesByDateRange(Date from, Date to) {
+		log.info("*********      from       ************ "+ from);
+		log.info("*********      to       ************ "+ to);
+		grid.setBeans(repo.findByTransactionDateBetween(from, to));
+		
+	}	
+	
 }
