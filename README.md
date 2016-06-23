@@ -1,6 +1,12 @@
 # expensetracker-cb
 spring-boot vaadin app showing CRUD operations and a few filter and search by date operation using Couchbase as datastore 
 
+SourceCode - You can find the source code at https://github.com/ratchakr/expensetracker-cb
+
+Email: You can contact me at my email:ratnopam_ch@yahoo.co.in or tweet to me @ratnopam
+
+2 minute screencast - View the overview at https://www.dropbox.com/s/eb5xinq05tnw9tr/expensetracker.mp4?dl=0
+
 Please follow the below steps to run the app. The steps given below are used for running the app in Docker
 
 1. Run a customized couchbase image couchbase 4.5 version:
