@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
 import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
+import org.springframework.data.domain.Pageable;
 
 /**
  * @author eratnch
@@ -25,6 +26,9 @@ public interface ExpenseDetailsRepository extends CouchbasePagingAndSortingRepos
 	List<ExpenseDetail> findByMerchant(String merchantName);
 	
 	List<ExpenseDetail> findByMerchantStartsWithIgnoreCase(String merchantName);
+
+	//List<ExpenseDetail>  findAll(int startIndex, int pageSize);
 	
+    //long count();	
 	
 }

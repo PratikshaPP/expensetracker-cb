@@ -1,0 +1,17 @@
+version: "2"
+services:
+  expensetracker-cb:
+    image: chakrar27/expensetracker-cb
+    ports:
+      - 8080:8080
+    depends_on:
+      - mycouchbase
+      
+  mycouchbase:
+    image: chakrar27/couchbase_new_10_08_2016
+    ports:
+      - 8091:8091
+      - 8092:8092 
+      - 8093:8093 
+      - 8094:8094
+      - 11210:11210

@@ -1,19 +1,20 @@
 package com.expensetrakcer.cb;
 
 
-import java.lang.reflect.Field;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.fields.MValueChangeEvent;
 import org.vaadin.viritin.fields.MValueChangeListener;
 import org.vaadin.viritin.form.AbstractForm.DeleteHandler;
 import org.vaadin.viritin.form.AbstractForm.ResetHandler;
 import org.vaadin.viritin.form.AbstractForm.SavedHandler;
+import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import com.vaadin.annotations.Theme;
@@ -22,15 +23,17 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SpringUI
 @Theme("valo")
@@ -62,12 +65,17 @@ public class ExpenseTrackerUI extends UI {
 
 	static final Logger log = LoggerFactory.getLogger(ExpenseTrackerUI.class);
 
+/*	final int pageSize = 10;*/
 	
 	@Autowired
 	public ExpenseTrackerUI(ExpenseDetailsRepository repo, ExpenseEditor editor) {
 		this.repo = repo;
 		this.editor = editor;
 		this.grid = new MTable<>(ExpenseDetail.class).withProperties("transactionDate", "transactionAmount", "transactionType", "merchant", "description").withHeight("300px");
+		
+/*		this.grid.setPageLength(5);
+		this.grid.setBeans(repo.findAll()); */
+		
 		this.addNewBtn = new Button("New Expense", FontAwesome.PLUS_CIRCLE);
 		this.filter = new TextField();
 		
@@ -82,18 +90,6 @@ public class ExpenseTrackerUI extends UI {
 		this.showAllBtn = new Button("Show All", FontAwesome.LIST);
 	}
 
-	/**
-	 * 
-	 * @param fieldToSearch
-	 */
-	private void populateOptions(NativeSelect fieldToSearch) {
-		Field[] fields = ExpenseDetail.class.getDeclaredFields();
-		for (Field f : fields) {
-			if (!f.getName().equalsIgnoreCase("id")) {
-				fieldToSearch.addItem(f.getName());
-			}
-		}
-	}
 
 	@Override
 	protected void init(VaadinRequest request) {
@@ -164,10 +160,25 @@ public class ExpenseTrackerUI extends UI {
 			}
 		});
 		
+/*		final long results = repo.count();
+        // create a paginationBar
+        PaginationBar paginationBar = new PaginationBar(new PaginationBar.PagingListener() {
+            @Override
+            public void pageRequested(int page) {
+                // reset the proper content to table 
+                // when page is changed by user
+                int firstResult = page * pageSize;
+                grid.setBeans(repo.findAll());
+            }
+        }, pageSize, results);*/
+
+		
 		// build layout
 		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn); 
 		HorizontalLayout dateFields = new HorizontalLayout(fromDate, toDate);
 		HorizontalLayout searchLayout = new HorizontalLayout(findBtn, showAllBtn);
+		
+		
 		
 		VerticalLayout mainLayout = new MVerticalLayout(actions, grid, editor, dateFields, searchLayout);
 		setContent(mainLayout);
@@ -222,5 +233,82 @@ public class ExpenseTrackerUI extends UI {
 		grid.setBeans(repo.findByTransactionDateBetween(from, to));
 		
 	}	
+	
+	public static class PaginationBar extends MHorizontalLayout {
+
+        private ClickListener handler = new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                if (event.getButton() == first) {
+                    currentPage = 0;
+                } else if (event.getButton() == last) {
+                    currentPage = pages - 1;
+                } else if (event.getButton() == next) {
+                    currentPage++;
+                } else if (event.getButton() == previous) {
+                    currentPage--;
+                }
+                updateState();
+                listener.pageRequested(currentPage);
+            }
+
+        };
+
+        private void updateState() {
+            final boolean hasPrev = currentPage > 0;
+            first.setEnabled(hasPrev);
+            previous.setEnabled(hasPrev);
+            final boolean hasNext = currentPage < pages - 1;
+            last.setEnabled(hasNext);
+            next.setEnabled(hasNext);
+            status.setValue((currentPage + 1) + "/" + pages);
+        }
+
+        private void initButtons() {
+            first = new MButton(FontAwesome.FAST_BACKWARD, handler).withStyleName(ValoTheme.BUTTON_BORDERLESS);
+            last = new MButton(FontAwesome.FAST_FORWARD, handler).withStyleName(ValoTheme.BUTTON_BORDERLESS);
+            next = new MButton(FontAwesome.FORWARD, handler).withStyleName(ValoTheme.BUTTON_BORDERLESS);
+            previous = new MButton(FontAwesome.BACKWARD, handler).withStyleName(ValoTheme.BUTTON_BORDERLESS);
+        }
+
+        public interface PagingListener {
+
+            void pageRequested(int page);
+        }
+
+        private PagingListener listener;
+        final private long size;
+        private final int pageSize;
+        private int currentPage;
+        final private int pages;
+
+        public long getSize() {
+            return size;
+        }
+
+        public PagingListener getListener() {
+            return listener;
+        }
+
+        public void setListener(PagingListener listener) {
+            this.listener = listener;
+        }
+
+        private Button first, last, next, previous;
+        private final Label status = new Label();
+
+        public PaginationBar(PagingListener listener, int pageSize, long size) {
+            this.listener = listener;
+            this.size = size;
+            this.pageSize = pageSize;
+            pages = (int) (size / pageSize);
+            initButtons();
+            updateState();
+            addComponents(first, previous, status, next, last);
+            alignAll(Alignment.MIDDLE_CENTER);
+            withFullWidth();
+        }
+
+    }	
 	
 }
